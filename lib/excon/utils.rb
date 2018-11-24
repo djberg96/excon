@@ -29,12 +29,15 @@ module Excon
 
     # Redact sensitive info from provided data
     def redact(datum)
+      auth_keys = %w[Authorization Proxy-Authorization]
       datum = datum.dup
-      if datum.has_key?(:headers)
+
+      if datum.has_key?(:headers) && auth_keys.any?{ |key| data[:headers].has_key?(key) }
         datum[:headers] = datum[:headers].dup
-        datum[:headers]['Authorization'] = REDACTED
-        datum[:headers]['Proxy-Authorization'] = REDACTED
+        datum[:headers]['Authorization'] = REDACTED if datum[:headers]['Authorization']
+        datum[:headers]['Proxy-Authorization'] = REDACTED if datum[:headers]['Proxy-Authorization']
       end
+
       if datum.has_key?(:password)
         datum[:password] = REDACTED
       end
